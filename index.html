@@ -153,6 +153,47 @@
     flex-wrap:wrap;
   }
 
+  /* 线路切换 */
+  .line-row{
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    gap:8px;
+    margin-top:12px;
+    flex-wrap:wrap;
+  }
+
+  .line-row .hint{
+    color:rgba(255,255,255,.6);
+    font-size:.78rem;
+    text-shadow:0 1px 4px rgba(0,0,0,.6);
+  }
+
+  .line-row button{
+    padding:6px 14px;
+    font-size:.78rem;
+    font-weight:700;
+    font-family:inherit;
+    color:rgba(255,255,255,.75);
+    background:rgba(255,255,255,.12);
+    border:1px solid rgba(255,255,255,.22);
+    border-radius:9px;
+    cursor:pointer;
+    transition:all .2s ease;
+  }
+
+  .line-row button:hover{
+    background:rgba(255,255,255,.22);
+    color:#fff;
+  }
+
+  .line-row button.active{
+    background:rgba(139,92,246,.9);
+    border-color:rgba(180,150,255,.9);
+    color:#fff;
+    box-shadow:0 3px 12px rgba(139,92,246,.5);
+  }
+
   /* 次级按钮：实心玻璃白，深色字，绝对看得见 */
   .link-btn{
     padding:11px 22px;
@@ -341,6 +382,12 @@
     </div>
 
     <button class="download-btn" id="downloadBtn" disabled>下载</button>
+
+    <div class="line-row" id="lineRow">
+      <span class="hint">线路</span>
+      <button data-proxy="1" class="active">加速</button>
+      <button data-proxy="0">直连</button>
+    </div>
 
     <div class="footer-links">
       <button class="link-btn" onclick="openModal('readme')">必读说明</button>
@@ -565,15 +612,39 @@
     const RELEASE_TAG = 'v1';
     // ==============================================
 
-    // Release 附件直链：点开即下载
-    const BASE = `https://github.com/${GITHUB_USER}/${GITHUB_REPO}/releases/download/${RELEASE_TAG}/`;
+    // 原始 Release 地址
+    const RAW_BASE = `https://github.com/${GITHUB_USER}/${GITHUB_REPO}/releases/download/${RELEASE_TAG}/`;
+    // 加速代理（实测比直连快约 12 倍）
+    const PROXY = 'https://gh-proxy.com/';
 
-    const downloadLinks = {
-      ep3_dx11: BASE + 'Family_Time_Ep_3_WINDOWS_DX11_b108.zip',
-      ep3_dx12: BASE + 'Family_Time_Ep_3_WINDOWS_DX12_b108.zip',
-      ep3_mac:  BASE + 'Family_Time_Ep_3_MAC_b108.zip',
-      ep4_dx11: BASE + 'Family_Time_Ep_4_WINDOWS_DX11_b126.zip'
+    const FILES = {
+      ep3_dx11: 'Family_Time_Ep_3_WINDOWS_DX11_b108.zip',
+      ep3_dx12: 'Family_Time_Ep_3_WINDOWS_DX12_b108.zip',
+      ep3_mac:  'Family_Time_Ep_3_MAC_b108.zip',
+      ep4_dx11: 'Family_Time_Ep_4_WINDOWS_DX11_b126.zip'
     };
+
+    // 是否走加速（默认开）
+    let useProxy = true;
+
+    function getUrl(key) {
+      const full = RAW_BASE + FILES[key];
+      return useProxy ? PROXY + full : full;
+    }
+
+    // 下载线路切换
+    const lineRow = document.getElementById('lineRow');
+    if (lineRow) {
+      const lineBtns = Array.from(lineRow.querySelectorAll('button'));
+      lineBtns.forEach(function (btn) {
+        btn.addEventListener('click', function () {
+          useProxy = btn.dataset.proxy === '1';
+          lineBtns.forEach(function (b) {
+            b.classList.toggle('active', b === btn);
+          });
+        });
+      });
+    }
 
     const chapterSelect = document.getElementById('chapterSelect');
     const downloadBtn = document.getElementById('downloadBtn');
@@ -583,9 +654,9 @@
     });
 
     downloadBtn.addEventListener('click', function () {
-      const link = downloadLinks[chapterSelect.value];
-      if (link) {
-        window.location.href = link;
+      const key = chapterSelect.value;
+      if (key && FILES[key]) {
+        window.location.href = getUrl(key);
       }
     });
 
