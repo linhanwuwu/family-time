@@ -378,6 +378,7 @@
         <option value="ep3_dx12">Ep 3 - DX12</option>
         <option value="ep3_mac">Ep 3 - Mac</option>
         <option value="ep4_dx11">Ep 4 - DX11</option>
+        <option value="ep4_cheat">Ep 4 - DX12 作弊菜单版</option>
       </select>
     </div>
 
@@ -621,14 +622,16 @@
       ep3_dx11: 'Family_Time_Ep_3_WINDOWS_DX11_b108.zip',
       ep3_dx12: 'Family_Time_Ep_3_WINDOWS_DX12_b108.zip',
       ep3_mac:  'Family_Time_Ep_3_MAC_b108.zip',
-      ep4_dx11: 'Family_Time_Ep_4_WINDOWS_DX11_b126.zip'
+      ep4_dx11: 'Family_Time_Ep_4_WINDOWS_DX11_b126.zip',
+      ep4_cheat:'FamilyTimeEP4_作弊菜单版.zip'
     };
 
     // 是否走加速（默认开）
     let useProxy = true;
 
     function getUrl(key) {
-      const full = RAW_BASE + FILES[key];
+      // 文件名可能含中文，必须编码
+      const full = RAW_BASE + encodeURIComponent(FILES[key]);
       return useProxy ? PROXY + full : full;
     }
 
